@@ -5,25 +5,55 @@ const {v4:uuidv4} = require('uuid')
  
 const HTTP_PORT = 8000
  
-const conTicket = mysql.createPool({
+const conDibbs = mysql.createPool({
     host:"localhost",
     user:"root",
     password:"Howard3247",
-    database:"test1"
+    database:"dibbs"
 })
 
 var app = express()
 app.use(cors())
 app.use(express.json())
+
+app.post("/users", (req, res, next) => {
+    let strFirstName = req.body.FirstName;
+    console.log(strFirstName)
+    let strLastName = req.body.LastName;
+    console.log(strLastName)
+    let strPassword = req.body.Password;
+    console.log(strPassword)
+    let strEmail = req.body.Email;
+    console.log(strEmail)
+    let strUserID = uuidv4();
+    let strCommand = "INSERT INTO tblUsers VALUES (?, ?, ?, ?, 1, ?)"
+    conDibbs.getConnection(function(err, connection){
+        if(err){
+            console.log(err)
+            res.status(500).json({status:"error", message:err})
+        }
+        else{
+            conDibbs.query(strCommand, [strUserID, strEmail, strFirstName, strLastName, strPassword], function(err, result){
+                if(err){
+                    console.log(err)
+                    res.status(500).json({status:"error", message:err})
+                }
+                else{
+                    res.status(201).json({status:"success", userid:strUserID})
+                }
+            })
+        }
+    })
+})
  
-app.get("/hello",(req,res,next) =>{
+app.get("/hello",(req,res,next) => {
     let strCommand = 'SELECT * FROM tblTickets'
-    conTicket.getConnection(function(err,connection){
+    conDibbs.getConnection(function(err,connection){
         if(err){
             console.log(err)
             res.status(500).json({status:"error",message:err})
         } else {
-            conTicket.query(strCommand,function(err,result){
+            conDibbs.query(strCommand,function(err,result){
                 if(err){
                     console.log(err)
                     res.status(500).json({status:"error",message:err})
