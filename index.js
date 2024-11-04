@@ -87,7 +87,30 @@ app.post("/addrooms", (req, res, next) => {
     })
 })
 
-
+app.post("/addreservation", (req, res, next) => {
+    let intClassroomID = req.query.ClassroomID;
+    console.log(intClassroomID)
+    let strUserID = req.query.UserID;
+    console.log(strUserID)
+    let strCommand = 'INSERT INTO tblReservations (ClassroomID, UserID, StartDateTime, EndDateTime) VALUES (?, ?, NOW(), (SELECT DATE_ADD(NOW(), INTERVAL 2 HOUR)))'
+    conDibbs.getConnection(function(err, connection){
+        if(err){
+            console.log(err)
+            res.status(500).json({status:"error", message:err})
+        }
+        else{
+            conDibbs.query(strCommand, [intClassroomID, strUserID], function(err, result){
+                if(err){
+                    console.log(err)
+                    res.status(500).json({status:"error", message:err})
+                }
+                else{
+                    res.status(201).json({status:"success", message:result})
+                }
+            })
+        }
+    })
+})
 
 // ASSIGNMENT END
 
