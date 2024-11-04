@@ -16,14 +16,89 @@ var app = express()
 app.use(cors())
 app.use(express.json())
 
+// ASSIGNMENT GETS
+app.get("/getrooms",(req,res,next) => {
+    let strCommand = 'SELECT * FROM tblClassrooms'
+    conDibbs.getConnection(function(err,connection){
+        if(err){
+            console.log(err)
+            res.status(500).json({status:"error",message:err})
+        } else {
+            conDibbs.query(strCommand,function(err,result){
+                if(err){
+                    console.log(err)
+                    res.status(500).json({status:"error",message:err})
+                } else {
+                    res.status(200).json(result)
+                }
+            })
+        }
+        connection.release();
+    })
+})
+
+app.get("/getreservations",(req,res,next) => {
+    let strCommand = 'SELECT * FROM tblReservations'
+    conDibbs.getConnection(function(err,connection){
+        if(err){
+            console.log(err)
+            res.status(500).json({status:"error",message:err})
+        } else {
+            conDibbs.query(strCommand,function(err,result){
+                if(err){
+                    console.log(err)
+                    res.status(500).json({status:"error",message:err})
+                } else {
+                    res.status(200).json(result)
+                }
+            })
+        }
+        connection.release();
+    })
+})
+
+// ASSIGNMENT POSTS
+app.post("/addrooms", (req, res, next) => {
+    let strRoomNumber = req.query.RoomNumber;
+    console.log(strRoomNumber)
+    let intCapacity = req.query.Capacity;
+    console.log(intCapacity)
+    let strEquipment = req.query.Equipment;
+    console.log(strEquipment)
+    let boolActive = req.query.Active;
+    console.log(boolActive)
+    let strCommand = 'INSERT INTO tblClassrooms (RoomNumber, Capacity, Equipment, Active) VALUES (?, ?, ?, ?)'
+    conDibbs.getConnection(function(err, connection){
+        if(err){
+            console.log(err)
+            res.status(500).json({status:"error", message:err})
+        }
+        else{
+            conDibbs.query(strCommand, [strRoomNumber, intCapacity, strEquipment, boolActive], function(err, result){
+                if(err){
+                    console.log(err)
+                    res.status(500).json({status:"error", message:err})
+                }
+                else{
+                    res.status(201).json({status:"success", message:result})
+                }
+            })
+        }
+    })
+})
+
+
+
+// ASSIGNMENT END
+
 app.post("/users", (req, res, next) => {
-    let strFirstName = req.body.FirstName;
+    let strFirstName = req.query.FirstName;
     console.log(strFirstName)
-    let strLastName = req.body.LastName;
+    let strLastName = req.query.LastName;
     console.log(strLastName)
-    let strPassword = req.body.Password;
+    let strPassword = req.query.Password;
     console.log(strPassword)
-    let strEmail = req.body.Email;
+    let strEmail = req.query.Email;
     console.log(strEmail)
     let strUserID = uuidv4();
     let strCommand = "INSERT INTO tblUsers VALUES (?, ?, ?, ?, 1, ?)"
